@@ -1,0 +1,306 @@
+-- SCHEMA: Webprojekt
+ 
+DROP SCHEMA "Webprojekt" CASCADE;
+ 
+CREATE SCHEMA "Webprojekt"
+    AUTHORIZATION postgres;
+set schema 'Webprojekt';
+
+CREATE TABLE Benutzer (
+benutzer_id serial primary key,
+vorname VARCHAR(100),
+nachname VARCHAR(100),
+geschlecht VARCHAR(20),
+geburtstag varchar(10),
+wohnort varchar(50),
+beziehungsstatus varchar(50),
+email varchar (100),
+bildURL varchar(100),
+kurzprofil varchar (500),
+passwort VARCHAR(100)
+);
+
+create table Personeninteresse (
+personeninteresse_id serial primary key,
+mindestalter varchar(2),
+maximalalter varchar(2),
+geschlecht varchar (20),
+benutzer_id integer references benutzer(benutzer_id) ON DELETE CASCADE
+);
+create table Staedteinteresse (
+stadt varchar(100) primary key
+);
+create table Interesse (
+Art varchar(100) primary key,
+oberbegriff varchar(100)
+);
+
+create table Veranstaltung (
+Veranstaltung_id serial primary key,
+veranstaltung_name varchar (100),
+beschreibung varchar (500),
+ort varchar (50) references staedteinteresse(stadt) ON DELETE CASCADE,
+datum varchar(10),
+beginn varchar(10),
+ende varchar(10),
+ersteller_id integer references benutzer(benutzer_id) ON DELETE CASCADE
+);
+
+create table gruppe(
+gruppe_id serial primary key,
+gruppe_name varchar(100),
+beschreibung varchar(500),
+ersteller_id integer references benutzer(benutzer_id) ON DELETE CASCADE
+);
+
+create table nachricht(
+nachricht_id serial primary key,
+nachrichtentext varchar(1000),
+sender_id integer references benutzer(benutzer_id) ON DELETE CASCADE,
+gelesen integer
+);
+
+create table Freundschaft(
+benutzer_id integer references benutzer(benutzer_id) ON DELETE CASCADE,
+freund_id integer references benutzer(benutzer_id) ON DELETE CASCADE,
+anfrage integer,
+primary key(benutzer_id, freund_id)
+);
+
+Create table Benutzer_Interesse(
+benutzer_id integer references benutzer(benutzer_id) ON DELETE CASCADE,
+interesse varchar(100) references interesse(art) ON DELETE CASCADE,
+primary key(benutzer_id, interesse)
+);
+
+Create table Veranstaltung_Interesse(
+veranstaltung_id integer references veranstaltung(veranstaltung_id) ON DELETE CASCADE,
+interesse varchar(100) references interesse(art) ON DELETE CASCADE,
+primary key(veranstaltung_id, interesse)
+);
+
+Create table Gruppe_Interesse(
+gruppe_id integer references gruppe(gruppe_id) ON DELETE CASCADE,
+interesse varchar(100) references interesse(art) ON DELETE CASCADE,
+primary key(gruppe_id, interesse)
+);
+
+create table Benutzer_in_Gruppe(
+gruppe_id integer references gruppe(gruppe_id) ON DELETE CASCADE,
+benutzer_id integer references Benutzer(benutzer_id) ON DELETE CASCADE,
+primary key(gruppe_id, benutzer_id)
+);
+
+create table Benutzer_besucht_veranstaltung(
+veranstaltung_id integer references veranstaltung(Veranstaltung_id) ON DELETE CASCADE,
+benutzer_id integer references Benutzer(benutzer_id) ON DELETE CASCADE,
+primary key(veranstaltung_id, benutzer_id)
+);
+
+create table Nachricht_an_Benutzer(
+empfaenger_id integer references Benutzer(benutzer_id) ON DELETE CASCADE,
+nachricht_id integer references nachricht(nachricht_id) ON DELETE CASCADE,
+primary key(empfaenger_id, nachricht_id)
+);
+
+
+
+create table Nachricht_in_Gruppe(
+gruppe_id integer references gruppe(gruppe_id) ON DELETE CASCADE,
+nachricht_id integer references nachricht(nachricht_id) ON DELETE CASCADE,
+primary key(gruppe_id, nachricht_id)
+);
+
+create table Nachricht_in_Veranstaltung(
+veranstaltung_id integer references veranstaltung(veranstaltung_id) ON DELETE CASCADE,
+nachricht_id integer references nachricht(nachricht_id) ON DELETE CASCADE,
+primary key(veranstaltung_id, nachricht_id)
+);
+
+Create table benutzer_staedteinteresse(
+benutzer_id integer references benutzer(benutzer_id) ON DELETE CASCADE,
+Stadt varchar(100) references staedteinteresse(stadt) ON DELETE CASCADE,
+primary key(benutzer_id, stadt)
+);
+
+Insert into staedteinteresse
+values 
+('Weinheim'),
+('Schriesheim'),
+('Mannheim'),
+('Heidelberg'),
+('Ludwigshafen'),
+('Schwetzingen'),
+('Hockenheim'),
+('Leimen'),
+('Wiesloch'),
+('Sinsheim');
+
+insert into interesse(art, oberbegriff) values
+('Hip-Hop', 'Musik'),
+('RnB', 'Musik'),
+('Salsa', 'Musik'),
+('Soul & Funk', 'Musik'),
+('Rock', 'Musik'),
+('Pop', 'Musik'),
+('Jazz & Blues', 'Musik'),
+('Elektro & House', 'Musik'),
+('Drum n Bass', 'Musik'),
+('Karaoke', 'Musik'),
+('Metal', 'Musik'),
+('Punk', 'Musik'),
+('Schlager', 'Musik'),
+('Klassik', 'Musik'),
+('80s, 90s, 2000er', 'Musik'),
+ ('Fußball', 'Sport'),
+('Handball', 'Sport'),
+('Volleyball', 'Sport'),
+('Tennis', 'Sport'),
+('Basketball', 'Sport'),
+('Eishockey', 'Sport'),
+('Marathon', 'Sport'),
+('Leichtathletik', 'Sport'),
+('Motorsport', 'Sport'),
+('Pferdesport', 'Sport'),
+('Tanzen', 'Sport'),
+('Yoga', 'Sport'),
+('Billard', 'Sport'),
+('Bowling', 'Sport'),
+('Dart', 'Sport'),
+('Abenteuer', 'Filmgenre'),
+('Action', 'Filmgenre'),
+('Drama', 'Filmgenre'),
+('Fantasy', 'Filmgenre'),
+('Science-Fiction', 'Filmgenre'),
+('Komödie', 'Filmgenre'),
+('Horror', 'Filmgenre'),
+('Liebe', 'Filmgenre'),
+('Thriller', 'Filmgenre'),
+('Weinfeste', 'Freizeit'),
+('Volksfeste', 'Freizeit'),
+('Wanderungen', 'Freizeit'),
+('Stadtführungen', 'Freizeit'),
+('Märkte', 'Freizeit'),
+('Messen', 'Freizeit'),
+('Kino', 'Freizeit'),
+('Museum', 'Kultur'),
+('Vorträge', 'Kultur'),
+('Kunst', 'Kultur'),
+('Ausstellungen', 'Kultur');
+
+Insert into benutzer(vorname, nachname, geschlecht, geburtstag, wohnort, beziehungsstatus, email, bildurl, passwort) values
+('Anne', 'Wann', 'weiblich', '25.04.1991', 'Mannheim', 'Vergeben', 'anne@web.de', 'frau.jpg', 'Anne123'),
+('Maria', 'Luciana', 'weiblich', '01.01.1988', 'Magdeburg', 'F+', 'lucia@web.de', 'frau.jpg', 'Lucia1'),
+('Thaddaeus', 'Talo', 'männlich', '01.02.1965', 'Sinsheim', 'Single', 'mueller@web.de', 'mann.jpg', 'Muller'),
+('Anneliese', 'Kraut', 'weiblich', '05.06.1999', 'Schriesheim', 'Vergeben', 'anne@web.de', 'frau.jpg', 'Anne123'),
+('Martin', 'Kajako', 'männlich', '01.01.1990', 'Mannheim', 'Single', 'kaja@web.de', 'mann.jpg', 'Kanu12'),
+('Klaus', 'Frey', 'männlich', '06.07.1978', 'Weinheim', 'F+', 'klaus@web.de', 'mann.jpg', 'Klausi'),
+('Peter', 'Mueller', 'männlich', '05.01.1976', 'Viernheim', 'Single', 'peter@web.de', 'mann.jpg', 'PeterL'),
+('Marcel', 'Bruggi', 'männlich', '13.03.1996', 'Altrip', 'Vergeben', 'marcel@web.de', 'mann.jpg', 'Marcel'),
+('Pascal', 'Klapper', 'männlich', '04.01.1996', 'Mannheim', 'Single', 'pascal@web.de', 'mann.jpg', 'Pascal'),
+('Manuela', 'Fischer', 'weiblich', '22.04.1984', 'Hamburg', 'Verheiratet', 'manu@web.de', 'frau.jpg', 'Manuela'),
+('Jasmin', 'Maier', 'weiblich', '19.07.1995', 'Ludwigshafen', 'Single', 'jasi@web.de', 'frau.jpg', 'Jasmin'),
+('Max', 'Traut', 'männlich', '17.02.1960', 'Heidelberg', 'Vergeben', 'max@web.de', 'mann.jpg', 'MaxMuster'),
+('Benjamin', 'Lauer', 'männlich', '05.08.1967', 'Köln', 'F+', 'ben@web.de', 'mann.jpg', 'Benjamin'),
+('Angelika', 'Meister', 'weiblich', '26.09.1992', 'Walldorf', 'Geschieden', 'angi@web.de', 'frau.jpg', 'Angelika'),
+('Markus', 'Lutz', 'männlich', '04.09.1989', 'Heidelberg', 'Verheiratet', 'markus@web.de', 'mann.jpg', 'Markus');
+
+insert into gruppe (gruppe_name, beschreibung, ersteller_id)
+ values ('Strickklub1998', 'Wir treffen uns zum Stricken, Tee trinken und zum gemütlichen Plausch.', 1),
+ ('Briefmarkenfreunde', 'Erkunden der Briefmarkenwelt für Anfänger wie auch Fortgeschrittene.', 2),
+ ('Skatrunde00', 'Für den Austausch unter Skatfreunden und zum Verabreden für Skattreffen.', 4),
+ ('Tippgemeinschaft Fußball', 'Eine Tippgruppe für jedermann, der Interesse am Fußball hat.', 8),
+ ('Kulturbanausen', 'Keine Kulturveranstaltung ist vor uns sicher, wir gehen überall hin, um die Kunst zu schätzen.', 1),
+ ('Fast and Furious', 'Autoliebhaber, die sich auch für Kunst und Liebesfilme interessieren!', 3),
+ ('Hollywood-Gucker', 'Egal, welchen Film, wir ziehen uns alles rein!!', 2),
+ ('Waldläufer', ' Gemeinsame Wanderungen planen/durchführen und dabei die Natur genießen.', 6),
+ ('Springer-Crew', 'Alles rund ums Pferd und Musik! Für jeden ist was dabei!', 4),
+ ('Entspannungstrupp', 'Mithilfe von Yoga, Tanzen und Drum n Bass kommen wir wieder runter und entspannen.', 5);
+
+ insert into benutzer_in_gruppe(gruppe_id, benutzer_id)
+ values (1,1), (2,2), (3,4), (4,8), (5,1), (6,3), (7,2), (8,6), (9,4), (10,5),
+(1,15), (1,12), (1,14), (1,7), (1,9),
+(2,1), (2,5), (2,15), (2,8), (2,7), (2,13),
+(3,1), (3,5), (3,7), (3,9), (3,11), (3,13), (3,15),
+(4,9), (4,10), (4,11), (4,12), (4,13), (4,14), (4,15),
+(5,2), (5,3), (5,4), (5,5), (5,6), (5,7), (5,8),
+(6,4), (6,1), (6,5), (6,6), (6,7), (6,8), (6,9), (6,10),
+(7,3), (7,4), (7,5), (7,6), (7,7), (7,8), (7,9),
+(8,7), (8,8), (8,9), (8,10), (8,11), (8,12), (8,13), (8,14), (8,15),
+(9,10), (9,11), (9,12), (9,13), (9,14), (9,15),
+(10,9), (10,11), (10,12), (10,13), (10,14), (10,15);
+
+insert into veranstaltung (veranstaltung_name, beschreibung, ort, datum, beginn, ende, ersteller_id)
+values ('Nachtlauf Ludwigshafen/Mannheim', 'Abends in Ludwigshafen starten und die Nacht in Mannheim ausklingen lassen.', 'Mannheim', '24.11.2018', '18:00', '24:00',1),
+ ('Weinkerwe mit Wanderung', 'Bei einer Wanderung gute neue Weine kosten und die Schönheit der Weinberge genießen.', 'Ludwigshafen', '22.11.2018', '10:00', '15:00',1),
+ ('Lesung/Vorträge zu "Schiller"', 'Schillers Zeit in Mannheim', 'Mannheim', '11.11.2018', '17:00', '19:00',2),
+ ('Bauernmarkt', 'Regionale Produkte, die für eine ausgezeichnete Qualität stehen, werden hier angeboten!', 'Sinsheim', '10.11.2018', '10:00', '14:00',4),
+ ('Ausstellung: Maya-Kunst', 'Ausstellungsstücke aus der Maya-Zeit, die jetzt exklusiv gezeigt werden','Mannheim', '10.12.2018', '10:00', '20:00', 8),
+ ('Filmnacht "Horror"', 'Klassiker wie Saw, Nightmare oder Ring finden ihren Weg auf die Leinwand in dieser Nacht, um das Schaudern zu feiern.', 'Mannheim', '12.12.2018', '20:00', '24:00',9),
+ ('Filmnacht "Liebe"', 'Wer ist nicht dahingeschmolzen, als Rose und Jack in "Titanic" zueinander fanden, und um das Genre der Liebesfilme zu feiern, werden Filme wie Titanic, und Dirty Dancing gezeigt. Lasst Euch überraschen, was noch gezeigt wird!', 'Mannheim', '19.12.2018', '20:00', '24:00',9),
+ ('AC/DC Live', 'Ein bombastisches Rockfeuerwerk erwartet Euch mit dem Auftritt von AC/DC.', 'Hockenheim', '20.06.2019', '18:00', '21:00',12),
+ ('Yoga im Park', 'Mit Euch wollen wir von der Yoga-Gruppe "Entspannungstrupp" eine gemeinsame Yogastunde im Luisenpark halten!', 'Mannheim', '12.01.2019', '15:00', '16:00',13),
+ ('Festival "Musik kann jeder"', 'Verschiedene Musikrichtungen präsentieren sich und jeder kann sich an Instrumenten oder Tanzarten probieren', 'Heidelberg', '30.04.2019', '14:00', '22:00',15);
+
+insert into benutzer_besucht_veranstaltung (veranstaltung_id, benutzer_id)
+values (1,1), (2,2), (3,4), (4,8), (5,1), (6,3), (7,2), (8,6), (9,4), (10,5),
+(1,15), (1,12), (1,14), (1,7), (1,9),
+(2,1), (2,5), (2,15), (2,8), (2,7), (2,13),
+(3,1), (3,5), (3,7), (3,9), (3,11), (3,13), (3,15),
+(4,9), (4,10), (4,11), (4,12), (4,13), (4,14), (4,15),
+(5,2), (5,3), (5,4), (5,5), (5,6), (5,7), (5,8),
+(6,4), (6,1), (6,5), (6,6), (6,7), (6,8), (6,9), (6,10),
+(7,3), (7,4), (7,5), (7,6), (7,7), (7,8), (7,9),
+(8,7), (8,8), (8,9), (8,10), (8,11), (8,12), (8,13), (8,14), (8,15),
+(9,10), (9,11), (9,12), (9,13), (9,14), (9,15),
+(10,9), (10,11), (10,12), (10,13), (10,14), (10,15);
+
+Insert into gruppe_interesse (gruppe_id, interesse)
+values (1, 'Kunst'), (1, 'Märkte'), (2, 'Komödie'), (4, 'Fußball'), (4, 'Basketball'), (5, 'Museum'), (5, 'Vorträge'), (5, 'Ausstellungen'), (5, 'Stadtführungen'), (5, 'Messen'), (6, 'Liebe'), (6, 'Abenteuer'), (6, 'Action'), (6, 'Drama'), (7, 'Abenteuer'), (7, 'Action'), (7, 'Drama'), (7, 'Fantasy'), (7, 'Science-Fiction'), (7, 'Horror'), (8, 'Marathon'), (8, 'Leichtathletik'), (9, 'Pferdesport'), (9, 'Salsa'), (9, 'Karaoke'), (9, 'Punk'), (10, 'Yoga'), (10, 'Drum n Bass');
+insert into veranstaltung_interesse (veranstaltung_id, interesse)
+values (1, 'Marathon'), (1, 'Leichtathletik'), (2, 'Weinfeste'), (2, 'Volksfeste'), (3, 'Vorträge'), (3, 'Kunst'), (4, 'Märkte'), (5, 'Ausstellungen'), (5, 'Kunst'), (6, 'Horror'), (7, 'Liebe'), (8, 'Rock'), (9, 'Yoga'), (10, 'Pop'), (10, 'Karaoke'), (10, 'Schlager'), (10, 'Rock');
+
+insert into benutzer_interesse
+values 
+(1, 'Bowling'), (1, 'Messen'), (1, 'Handball'), (1, 'Liebe'),
+(4, 'Karaoke'), (4, 'Märkte'), (4, 'Punk'), (4, 'Weinfeste'), (14, 'Marathon'),
+(7, 'Messen'), (7, 'Karaoke'), (7, 'Abenteuer'), (7, 'Basketball'),
+(10, 'Eishockey'), (10, 'Horror'), (10, 'Karaoke'), (10, 'Bowling'),
+(14, 'Science-Fiction'), (14, 'Kino'), (14, 'Kunst'), (14, 'Dart'), (14, 'Yoga');
+insert into benutzer_staedteinteresse
+values
+(2, 'Heidelberg'), (3, 'Mannheim'), (5, 'Wiesloch'), (6, 'Schwetzingen'), (8, 'Ludwigshafen'), (1, 'Hockenheim'), (12, 'Sinsheim'), (13, 'Weinheim'), (13, 'Leimen');
+insert into freundschaft
+values
+(1, 8, 1), (1, 9, 0), (1, 11, 0), (9, 1, 0), (11, 1, 0), (12, 13, 0), (13, 12, 0), (2, 3, 1), (3, 5, 1), (6, 7, 0), (7, 6, 0), (14, 5, 0), (5, 14, 0), (10, 8, 1);
+insert into personeninteresse (mindestalter, maximalalter, geschlecht, benutzer_id)
+values
+(20, 30, 'weiblich', 4), (18, 35, 'beides', 1), (16, 20, 'weiblich', 2), (25, 30, 'männlich', 3),
+(20, 35, 'beides', 6), (30, 35, 'beides', 8), (35, 40, 'weiblich', 10), (20, 35, 'männlich', 11),
+(18, 30, 'männlich', 12), (16, 35, 'beides', 13), (20, 30, 'weiblich', 14), (25, 30, 'männlich', 15);
+insert into nachricht (nachrichtentext, sender_id, gelesen)
+values
+('Hallo Leute, wir wollen demnächst ein Treffen vereinbaren. Wer ist alles dabei?', 1, 1),
+('Hallo Leute, wir wollen demnächst ein Treffen vereinbaren. Wer ist alles dabei?', 2, 1),
+('Hallo Leute, wir wollen demnächst ein Treffen vereinbaren. Wer ist alles dabei?', 3, 1),
+('Hallo Leute, wir wollen demnächst ein Treffen vereinbaren. Wer ist alles dabei?', 4, 1),
+('Hallo Leute, wir wollen demnächst ein Treffen vereinbaren. Wer ist alles dabei?', 10, 1),
+('Hallo Leute, wir wollen demnächst ein Treffen vereinbaren. Wer ist alles dabei?', 12, 1),
+('Hallo Leute, wir wollen demnächst ein Treffen vereinbaren. Wer ist alles dabei?', 15, 1),
+('Hallo Leute, wir wollen demnächst ein Treffen vereinbaren. Wer ist alles dabei?', 4, 1),
+('Hallo Leute, wir wollen demnächst ein Treffen vereinbaren. Wer ist alles dabei?', 6, 1),
+('Hallo Leute, wir wollen demnächst ein Treffen vereinbaren. Wer ist alles dabei?', 8, 1),
+('Hallo, hast du Lust mal was zu unternehmen?', 2, 1),
+('Hallo, hast du Lust mal was zu unternehmen?', 9, 1),
+('Hallo, hast du Lust mal was zu unternehmen?', 3, 0),
+('Hallo, hast du Lust mal was zu unternehmen?', 1, 1),
+('Hallo, hast du Lust mal was zu unternehmen?', 1, 0);
+insert into nachricht_in_gruppe (gruppe_id, nachricht_id)
+values
+(1, 1), (2, 2), (5, 3), (3, 4), (6, 5);
+insert into nachricht_an_benutzer (empfaenger_id, nachricht_id)
+values
+(5, 11), (13, 12), (10, 13), (7, 14), (8, 15);
+insert into nachricht_in_veranstaltung (veranstaltung_id, nachricht_id)
+values
+(8, 6), (3, 7), (5, 8), (6, 9), (6, 10);
